@@ -33,6 +33,11 @@ app.get('/api/contacts', (req, res) => {
 // GET /api/contacts/:id - Get a specific contact by ID
 app.get('/api/contacts/:id', (req, res) => {
   const id = parseInt(req.params.id);
+  
+  if (isNaN(id) || id < 1) {
+    return res.status(400).json({ error: 'Invalid contact ID' });
+  }
+  
   const contact = contacts.find(c => c.id === id);
   
   if (!contact) {
@@ -47,7 +52,7 @@ app.post('/api/contacts', (req, res) => {
   const { firstName, lastName, email, telephone } = req.body;
   
   // Basic validation
-  if (!firstName || !lastName || !email || !telephone) {
+  if (!firstName?.trim() || !lastName?.trim() || !email?.trim() || !telephone?.trim()) {
     return res.status(400).json({ 
       error: 'All fields are required: firstName, lastName, email, telephone' 
     });
@@ -55,10 +60,10 @@ app.post('/api/contacts', (req, res) => {
   
   const newContact = {
     id: nextId++,
-    firstName,
-    lastName,
-    email,
-    telephone
+    firstName: firstName.trim(),
+    lastName: lastName.trim(),
+    email: email.trim(),
+    telephone: telephone.trim()
   };
   
   contacts.push(newContact);
@@ -68,6 +73,11 @@ app.post('/api/contacts', (req, res) => {
 // PUT /api/contacts/:id - Update a contact
 app.put('/api/contacts/:id', (req, res) => {
   const id = parseInt(req.params.id);
+  
+  if (isNaN(id) || id < 1) {
+    return res.status(400).json({ error: 'Invalid contact ID' });
+  }
+  
   const contactIndex = contacts.findIndex(c => c.id === id);
   
   if (contactIndex === -1) {
@@ -77,7 +87,7 @@ app.put('/api/contacts/:id', (req, res) => {
   const { firstName, lastName, email, telephone } = req.body;
   
   // Basic validation
-  if (!firstName || !lastName || !email || !telephone) {
+  if (!firstName?.trim() || !lastName?.trim() || !email?.trim() || !telephone?.trim()) {
     return res.status(400).json({ 
       error: 'All fields are required: firstName, lastName, email, telephone' 
     });
@@ -85,10 +95,10 @@ app.put('/api/contacts/:id', (req, res) => {
   
   contacts[contactIndex] = {
     id,
-    firstName,
-    lastName,
-    email,
-    telephone
+    firstName: firstName.trim(),
+    lastName: lastName.trim(),
+    email: email.trim(),
+    telephone: telephone.trim()
   };
   
   res.json(contacts[contactIndex]);
@@ -97,6 +107,11 @@ app.put('/api/contacts/:id', (req, res) => {
 // DELETE /api/contacts/:id - Delete a contact
 app.delete('/api/contacts/:id', (req, res) => {
   const id = parseInt(req.params.id);
+  
+  if (isNaN(id) || id < 1) {
+    return res.status(400).json({ error: 'Invalid contact ID' });
+  }
+  
   const contactIndex = contacts.findIndex(c => c.id === id);
   
   if (contactIndex === -1) {
