@@ -122,6 +122,11 @@ app.delete('/api/contacts/:id', (req, res) => {
   res.status(204).send();
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({ 
