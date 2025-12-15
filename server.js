@@ -5,6 +5,19 @@ const PORT = process.env.PORT || 3000;
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+// Simple request logging middleware
+app.use((req, res, next) => {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] ${req.method} ${req.path}`);
+  next();
+});
+
+// Email validation helper
+const isValidEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 // In-memory contact storage
 let contacts = [
   {
@@ -27,7 +40,7 @@ let nextId = 3;
 
 // GET /api/contacts - Get all contacts
 app.get('/api/contacts', (req, res) => {
-  res.json(contacts);
+  res.json({ success: true, data: contacts });
 });
 
 // GET /api/contacts/:id - Get a specific contact by ID
@@ -35,26 +48,51 @@ app.get('/api/contacts/:id', (req, res) => {
   const id = parseInt(req.params.id);
   
   if (isNaN(id) || id < 1) {
-    return res.status(400).json({ error: 'Invalid contact ID' });
+    console.error(`[ERROR] Invalid contact ID: ${req.params.id}`);
+    return res.status(400).json({ 
+      success: false, 
+      error: { message: 'Invalid contact ID', code: 'INVALID_ID' }
+    });
   }
   
   const contact = contacts.find(c => c.id === id);
   
   if (!contact) {
-    return res.status(404).json({ error: 'Contact not found' });
+    console.error(`[ERROR] Contact not found: ${id}`);
+    return res.status(404).json({ 
+      success: false, 
+      error: { message: 'Contact not found', code: 'NOT_FOUND' }
+    });
   }
   
-  res.json(contact);
+  res.json({ success: true, data: contact });
 });
 
 // POST /api/contacts - Create a new contact
 app.post('/api/contacts', (req, res) => {
   const { firstName, lastName, email, telephone } = req.body;
   
-  // Basic validation
+  // Validate required fields
   if (!firstName?.trim() || !lastName?.trim() || !email?.trim() || !telephone?.trim()) {
+    console.error('[ERROR] Missing required fields in POST request');
     return res.status(400).json({ 
-      error: 'All fields are required: firstName, lastName, email, telephone' 
+      success: false,
+      error: { 
+        message: 'All fields are required: firstName, lastName, email, telephone',
+        code: 'MISSING_FIELDS'
+      }
+    });
+  }
+  
+  // Validate email format
+  if (!isValidEmail(email.trim())) {
+    console.error(`[ERROR] Invalid email format: ${email}`);
+    return res.status(400).json({ 
+      success: false,
+      error: { 
+        message: 'Invalid email format',
+        code: 'INVALID_EMAIL'
+      }
     });
   }
   
@@ -67,7 +105,7 @@ app.post('/api/contacts', (req, res) => {
   };
   
   contacts.push(newContact);
-  res.status(201).json(newContact);
+  res.status(201).json({ success: true, data: newContact });
 });
 
 // PUT /api/contacts/:id - Update a contact
@@ -75,21 +113,46 @@ app.put('/api/contacts/:id', (req, res) => {
   const id = parseInt(req.params.id);
   
   if (isNaN(id) || id < 1) {
-    return res.status(400).json({ error: 'Invalid contact ID' });
+    console.error(`[ERROR] Invalid contact ID: ${req.params.id}`);
+    return res.status(400).json({ 
+      success: false,
+      error: { message: 'Invalid contact ID', code: 'INVALID_ID' }
+    });
   }
   
   const contactIndex = contacts.findIndex(c => c.id === id);
   
   if (contactIndex === -1) {
-    return res.status(404).json({ error: 'Contact not found' });
+    console.error(`[ERROR] Contact not found: ${id}`);
+    return res.status(404).json({ 
+      success: false,
+      error: { message: 'Contact not found', code: 'NOT_FOUND' }
+    });
   }
   
   const { firstName, lastName, email, telephone } = req.body;
   
-  // Basic validation
+  // Validate required fields
   if (!firstName?.trim() || !lastName?.trim() || !email?.trim() || !telephone?.trim()) {
+    console.error('[ERROR] Missing required fields in PUT request');
     return res.status(400).json({ 
-      error: 'All fields are required: firstName, lastName, email, telephone' 
+      success: false,
+      error: { 
+        message: 'All fields are required: firstName, lastName, email, telephone',
+        code: 'MISSING_FIELDS'
+      }
+    });
+  }
+  
+  // Validate email format
+  if (!isValidEmail(email.trim())) {
+    console.error(`[ERROR] Invalid email format: ${email}`);
+    return res.status(400).json({ 
+      success: false,
+      error: { 
+        message: 'Invalid email format',
+        code: 'INVALID_EMAIL'
+      }
     });
   }
   
@@ -101,7 +164,7 @@ app.put('/api/contacts/:id', (req, res) => {
     telephone: telephone.trim()
   };
   
-  res.json(contacts[contactIndex]);
+  res.json({ success: true, data: contacts[contactIndex] });
 });
 
 // DELETE /api/contacts/:id - Delete a contact
@@ -109,13 +172,21 @@ app.delete('/api/contacts/:id', (req, res) => {
   const id = parseInt(req.params.id);
   
   if (isNaN(id) || id < 1) {
-    return res.status(400).json({ error: 'Invalid contact ID' });
+    console.error(`[ERROR] Invalid contact ID: ${req.params.id}`);
+    return res.status(400).json({ 
+      success: false,
+      error: { message: 'Invalid contact ID', code: 'INVALID_ID' }
+    });
   }
   
   const contactIndex = contacts.findIndex(c => c.id === id);
   
   if (contactIndex === -1) {
-    return res.status(404).json({ error: 'Contact not found' });
+    console.error(`[ERROR] Contact not found: ${id}`);
+    return res.status(404).json({ 
+      success: false,
+      error: { message: 'Contact not found', code: 'NOT_FOUND' }
+    });
   }
   
   contacts.splice(contactIndex, 1);
