@@ -5,6 +5,21 @@ const PORT = process.env.PORT || 3000;
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+// Validation helper functions
+function isValidEmail(email) {
+  // Basic email validation: checks for format like user@domain.ext
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+function isValidPhoneNumber(telephone) {
+  // Phone number validation: allows digits, spaces, parentheses, hyphens, dots, and + prefix
+  // Must contain at least 7 digits and only valid formatting characters
+  const digitCount = telephone.replace(/\D/g, '').length;
+  const phoneRegex = /^[\d\s\(\)\-\.\+]+$/;
+  return digitCount >= 7 && digitCount <= 15 && phoneRegex.test(telephone);
+}
+
 // In-memory contact storage
 let contacts = [
   {
@@ -51,10 +66,27 @@ app.get('/api/contacts/:id', (req, res) => {
 app.post('/api/contacts', (req, res) => {
   const { firstName, lastName, email, telephone } = req.body;
   
-  // Basic validation
+  // Basic validation - check if fields are present and non-empty
   if (!firstName?.trim() || !lastName?.trim() || !email?.trim() || !telephone?.trim()) {
     return res.status(400).json({ 
       error: 'All fields are required: firstName, lastName, email, telephone' 
+    });
+  }
+  
+  const trimmedEmail = email.trim();
+  const trimmedTelephone = telephone.trim();
+  
+  // Email format validation
+  if (!isValidEmail(trimmedEmail)) {
+    return res.status(400).json({ 
+      error: 'Invalid email format' 
+    });
+  }
+  
+  // Telephone format validation
+  if (!isValidPhoneNumber(trimmedTelephone)) {
+    return res.status(400).json({ 
+      error: 'Invalid telephone format' 
     });
   }
   
@@ -62,8 +94,8 @@ app.post('/api/contacts', (req, res) => {
     id: nextId++,
     firstName: firstName.trim(),
     lastName: lastName.trim(),
-    email: email.trim(),
-    telephone: telephone.trim()
+    email: trimmedEmail,
+    telephone: trimmedTelephone
   };
   
   contacts.push(newContact);
@@ -86,10 +118,27 @@ app.put('/api/contacts/:id', (req, res) => {
   
   const { firstName, lastName, email, telephone } = req.body;
   
-  // Basic validation
+  // Basic validation - check if fields are present and non-empty
   if (!firstName?.trim() || !lastName?.trim() || !email?.trim() || !telephone?.trim()) {
     return res.status(400).json({ 
       error: 'All fields are required: firstName, lastName, email, telephone' 
+    });
+  }
+  
+  const trimmedEmail = email.trim();
+  const trimmedTelephone = telephone.trim();
+  
+  // Email format validation
+  if (!isValidEmail(trimmedEmail)) {
+    return res.status(400).json({ 
+      error: 'Invalid email format' 
+    });
+  }
+  
+  // Telephone format validation
+  if (!isValidPhoneNumber(trimmedTelephone)) {
+    return res.status(400).json({ 
+      error: 'Invalid telephone format' 
     });
   }
   
@@ -97,8 +146,8 @@ app.put('/api/contacts/:id', (req, res) => {
     id,
     firstName: firstName.trim(),
     lastName: lastName.trim(),
-    email: email.trim(),
-    telephone: telephone.trim()
+    email: trimmedEmail,
+    telephone: trimmedTelephone
   };
   
   res.json(contacts[contactIndex]);
