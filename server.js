@@ -15,9 +15,9 @@ function isValidEmail(email) {
 function isValidPhoneNumber(telephone) {
   // Phone number validation: allows digits, spaces, parentheses, hyphens, dots, and + prefix
   // Must contain at least 7 digits and only valid formatting characters
-  const phoneRegex = /^[\d\s\(\)\-\.\+]+$/;
   const digitCount = telephone.replace(/\D/g, '').length;
-  return phoneRegex.test(telephone) && digitCount >= 7 && digitCount <= 15;
+  const phoneRegex = /^[\d\s\(\)\-\.\+]+$/;
+  return digitCount >= 7 && digitCount <= 15 && phoneRegex.test(telephone);
 }
 
 // In-memory contact storage
