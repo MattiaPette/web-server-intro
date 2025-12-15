@@ -122,11 +122,17 @@ app.delete('/api/contacts/:id', (req, res) => {
   res.status(204).send();
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({ 
     message: 'Contact List API',
     endpoints: {
+      'GET /health': 'Health check endpoint',
       'GET /api/contacts': 'Get all contacts',
       'GET /api/contacts/:id': 'Get a contact by ID',
       'POST /api/contacts': 'Create a new contact',
