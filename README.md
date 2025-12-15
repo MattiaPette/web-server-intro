@@ -244,7 +244,7 @@ The server logs all incoming requests with timestamps:
 
 Error conditions are also logged:
 ```
-[ERROR] Invalid email format: notanemail
+[ERROR] Invalid email format in POST request
 [ERROR] Contact not found: 999
 ```
 

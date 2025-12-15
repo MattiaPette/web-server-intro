@@ -86,7 +86,7 @@ app.post('/api/contacts', (req, res) => {
   
   // Validate email format
   if (!isValidEmail(email.trim())) {
-    console.error(`[ERROR] Invalid email format: ${email}`);
+    console.error('[ERROR] Invalid email format in POST request');
     return res.status(400).json({ 
       success: false,
       error: { 
@@ -146,7 +146,7 @@ app.put('/api/contacts/:id', (req, res) => {
   
   // Validate email format
   if (!isValidEmail(email.trim())) {
-    console.error(`[ERROR] Invalid email format: ${email}`);
+    console.error('[ERROR] Invalid email format in PUT request');
     return res.status(400).json({ 
       success: false,
       error: { 
