@@ -35,22 +35,46 @@ npm run dev
 
 ## API Endpoints
 
+All endpoints return consistent JSON responses with the following structure:
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "data": { /* response data */ }
+}
+```
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Error description",
+    "code": "ERROR_CODE"
+  }
+}
+```
+
 ### Get All Contacts
 ```
 GET /api/contacts
 ```
 
-**Response:**
+**Response (200 OK):**
 ```json
-[
-  {
-    "id": 1,
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john.doe@example.com",
-    "telephone": "+1234567890"
-  }
-]
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john.doe@example.com",
+      "telephone": "+1234567890"
+    }
+  ]
+}
 ```
 
 ### Get a Contact by ID
@@ -58,14 +82,28 @@ GET /api/contacts
 GET /api/contacts/:id
 ```
 
-**Response:**
+**Response (200 OK):**
 ```json
 {
-  "id": 1,
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@example.com",
-  "telephone": "+1234567890"
+  "success": true,
+  "data": {
+    "id": 1,
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "telephone": "+1234567890"
+  }
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Contact not found",
+    "code": "NOT_FOUND"
+  }
 }
 ```
 
@@ -84,14 +122,33 @@ POST /api/contacts
 }
 ```
 
-**Response:**
+**Validation Rules:**
+- All fields are required: `firstName`, `lastName`, `email`, `telephone`
+- Email must be in valid format (e.g., `user@example.com`)
+- Fields are trimmed of leading/trailing whitespace
+
+**Response (201 Created):**
 ```json
 {
-  "id": 3,
-  "firstName": "Jane",
-  "lastName": "Smith",
-  "email": "jane.smith@example.com",
-  "telephone": "+0987654321"
+  "success": true,
+  "data": {
+    "id": 3,
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "email": "jane.smith@example.com",
+    "telephone": "+0987654321"
+  }
+}
+```
+
+**Error Response (400 Bad Request):**
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Invalid email format",
+    "code": "INVALID_EMAIL"
+  }
 }
 ```
 
@@ -110,14 +167,33 @@ PUT /api/contacts/:id
 }
 ```
 
-**Response:**
+**Validation Rules:**
+- All fields are required: `firstName`, `lastName`, `email`, `telephone`
+- Email must be in valid format (e.g., `user@example.com`)
+- Fields are trimmed of leading/trailing whitespace
+
+**Response (200 OK):**
 ```json
 {
-  "id": 1,
-  "firstName": "Jane",
-  "lastName": "Doe",
-  "email": "jane.doe@example.com",
-  "telephone": "+1111111111"
+  "success": true,
+  "data": {
+    "id": 1,
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "email": "jane.doe@example.com",
+    "telephone": "+1111111111"
+  }
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Contact not found",
+    "code": "NOT_FOUND"
+  }
 }
 ```
 
@@ -126,7 +202,51 @@ PUT /api/contacts/:id
 DELETE /api/contacts/:id
 ```
 
-**Response:** 204 No Content
+**Response (204 No Content):** Empty body
+
+**Error Response (404 Not Found):**
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Contact not found",
+    "code": "NOT_FOUND"
+  }
+}
+```
+
+## HTTP Status Codes
+
+The API uses standard HTTP status codes:
+
+- `200 OK` - Successful GET or PUT request
+- `201 Created` - Successful POST request (new resource created)
+- `204 No Content` - Successful DELETE request
+- `400 Bad Request` - Invalid request (validation error, malformed data)
+- `404 Not Found` - Resource not found
+
+## Error Codes
+
+The API returns standardized error codes in error responses:
+
+- `INVALID_ID` - The provided contact ID is invalid
+- `NOT_FOUND` - The requested contact does not exist
+- `MISSING_FIELDS` - Required fields are missing from the request
+- `INVALID_EMAIL` - The email format is invalid
+
+## Request Logging
+
+The server logs all incoming requests with timestamps:
+```
+[2025-12-15T12:00:00.000Z] GET /api/contacts
+[2025-12-15T12:00:01.000Z] POST /api/contacts
+```
+
+Error conditions are also logged:
+```
+[ERROR] Invalid email format in POST request
+[ERROR] Contact not found: 999
+```
 
 ## Testing with curl
 
